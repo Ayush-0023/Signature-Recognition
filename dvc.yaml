@@ -1,0 +1,51 @@
+stages:
+
+  training:
+    cmd: python -m src.pipeline.training
+
+    deps:
+      - src/components/data_ingestion.py
+      - src/components/data_validation.py
+      - src/components/data_transformation.py
+      - src/components/model_trainer.py
+      - src/pipeline/training.py
+      - src/configurations/configuration.py
+      - src/entity/config_entity.py
+      - src/entity/artifact_entity.py
+      - src/utils/main_utils.py
+      - src/constants
+      - config/config.yaml
+
+    params:
+      - NUM_CLASSES
+      - EPOCHS
+      - LEARNING_RATE
+      - MOMENTUM
+
+    outs:
+      - artifacts/model_trainer/signature_resnet34.pth
+
+
+  evaluation:
+    cmd: python -m src.pipeline.evaluation
+
+    deps:
+      - artifacts/model_trainer/signature_resnet34.pth
+      - src/components/model_evaluation.py
+      - src/pipeline/evaluation.py
+      - src/components/data_validation.py
+      - src/components/data_transformation.py
+      - src/configurations/configuration.py
+      - src/entity/config_entity.py
+      - src/entity/artifact_entity.py
+      - src/utils/main_utils.py
+      - src/constants
+      - config/config.yaml
+
+    metrics:
+      - artifacts/model_evaluation/metrics.json:
+          cache: false
+
+    plots:
+      - artifacts/model_evaluation/confusion_matrix.png:
+          cache: false
